@@ -4,7 +4,13 @@ import argparse
 import time
 import os
 
-###Purpose: This script takes the raw seq output fastq files and renames them to what you make the os.chdir('FASTQ_BBEX17') say. 
+# Purpose: This script renames the fastq sequencing files to the sample names using the CSV file that 
+# contains the indexes and the sample names (this file is specific to our GRCF seqeucing core and you get this file back with the FASTQs).
+
+# Keep the directory hierarchy the same as when the FASTQ files are downloaded.
+# The input file is the .CSV file that contains the indexes and the corresponding sample names. (argv[1])
+# The renamed files are placed in a new directory named 'Renamed_Files'.
+# note: The sequencing FASTQs need to be in a directory called 'FASTQ' within your working directory, this is the name the core gives us. 
 
 filedata = open(argv[1],"r")
 
@@ -29,9 +35,12 @@ for line in filedata.readlines():
             else:
                 sampledict[linesplit[4]] = [linesplit[5]]
 
-os.chdir('FASTQ_BBEX17')
-for name in sampledict.iterkeys():
-    subprocess.call('cat '+sampledict[name][0]+'_1.fastq '+sampledict[name][1]+'_1.fastq > ../Renamed_Files/'+name+'.fq', shell = True)    
+os.chdir('FASTQ')
+for name in sampledict.keys():
+    if sampledict[name] == 1:
+        subprocess.call('cat '+sampledict[name][0]+'_1.fastq ', shell = True)
+    else:   
+        subprocess.call('cat '+sampledict[name][0]+'_1.fastq '+sampledict[name][1]+'_1.fastq > ../Renamed_Files/'+name+'.fq', shell = True)    
 
 
 
