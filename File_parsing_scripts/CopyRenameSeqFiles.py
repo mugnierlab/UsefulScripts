@@ -37,7 +37,7 @@ for line in filedata.readlines():
 
 os.chdir('FASTQ')
 for name in sampledict.keys():
-    if sampledict[name] == 1:
+    if len(sampledict[name]) == 1:
         subprocess.call('cat '+sampledict[name][0]+'_1.fastq ', shell = True)
     else:   
         subprocess.call('cat '+sampledict[name][0]+'_1.fastq '+sampledict[name][1]+'_1.fastq > ../Renamed_Files/'+name+'.fq', shell = True)    
