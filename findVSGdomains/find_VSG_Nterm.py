@@ -237,24 +237,24 @@ hmmscan_type(seq_variants_file, path_hmm)
 print "HMMER hmmscan analysis complete.\n"
 
 for file in os.listdir(os.getcwd()):
-		if file.endswith("TypeA.out") or file.endswith("TypeB.out"):
-			empty = "#" # If there are no hmmscan hits, then the fourth line in hmmscan .out file contains "#".
-			fourth_line = str(linecache.getline(file, 4))
-			if not empty in fourth_line:
-				type_letter = os.path.splitext(str(file))[0][-1] # "A" or "B"
-				nterm_seqIDs = nterm_type_ID(file, all_original_seqIDs) # List of sequence ID(s) of the N-terminal domain sequence(s).
-				print ("Found most probable Type%s N-terminal domain(s) in %r.\n") % (type_letter, file)
-				nterms_file = infile_base + "_Nterm_Type" + type_letter + "_FINAL.fa" # Name of file that will contain the N-terminal domain sequence(s).
-				for sequence in SeqIO.parse(seq_variants_file, "fasta"):
-					for nterm_seqID in nterm_seqIDs:
-						if nterm_seqID == sequence.id:
-							nterm_seqRecord = SeqRecord(
-							seq = sequence.seq,
-							id = sequence.id + "_Type" + type_letter, # Add the VSG N-terminal domain Type to sequence ID.
-							description = "",
-						)
-							with open(nterms_file, "a") as nterms_outfile: # Append N-terminal domain sequence to a file.
-								SeqIO.write(nterm_seqRecord, nterms_outfile, "fasta")
+	if file.endswith("TypeA.out") or file.endswith("TypeB.out"):
+		empty = "#" # If there are no hmmscan hits, then the fourth line in hmmscan .out file contains "#".
+		fourth_line = str(linecache.getline(file, 4))
+		if not empty in fourth_line:
+			type_letter = os.path.splitext(str(file))[0][-1] # "A" or "B"
+			nterm_seqIDs = nterm_type_ID(file, all_original_seqIDs) # List of sequence ID(s) of the N-terminal domain sequence(s).
+			print ("Found most probable Type%s N-terminal domain(s) in %r.\n") % (type_letter, file)
+			nterms_file = infile_base + "_Nterm_Type" + type_letter + "_FINAL.fa" # Name of file that will contain the N-terminal domain sequence(s).
+			for sequence in SeqIO.parse(seq_variants_file, "fasta"):
+				for nterm_seqID in nterm_seqIDs:
+					if nterm_seqID == sequence.id:
+						nterm_seqRecord = SeqRecord(
+						seq = sequence.seq,
+						id = sequence.id + "_Type" + type_letter, # Add the VSG N-terminal domain Type to sequence ID.
+						description = "",
+					)
+						with open(nterms_file, "a") as nterms_outfile: # Append N-terminal domain sequence to a file.
+							SeqIO.write(nterm_seqRecord, nterms_outfile, "fasta")
 
 # Concatenate the FASTA files containing the TypeA and/or TypeB N-terminal sequence(s).
 seq_nterms_file_wType = infile_base + "_Nterm_wType.fa"
@@ -279,25 +279,25 @@ hmmscan_subtype(seq_nterms_file_woType, path_hmm)
 print "HMMER hmmscan analysis complete.\n"
 
 for file in os.listdir(os.getcwd()):
-		if file.endswith("TypeABsubtype.out"):
-			empty = "#" # If there are no hmmscan hits, then the fourth line in hmmscan .out file contains "#".
-			fourth_line = str(linecache.getline(file, 4))
-			if not empty in fourth_line:
-				typed_nterms = nterm_subtype_ID(file, all_original_seqIDs) # Dictionary - {N-terminal domain sequence ID: type-subtype}.
-				print ("Found most probable type and subtype of the identified N-terminal domain(s) in %r.\n") % file
-				typedsubtyped_nterms_file = infile_base + "_Nterm_wType_FINAL.fa" # Name of file that will contain the N-terminal domain sequence(s) with type-subtype.
-				for sequence in SeqIO.parse(seq_variants_file, "fasta"):
-					for nterm_seqID, nterm_seqTypeSubtype  in typed_nterms.items():
-						if nterm_seqID == sequence.id:
-							typedsubtyped_nterm_seqRecord = SeqRecord(
-							seq = sequence.seq,
-							id = sequence.id + "_Type" + nterm_seqTypeSubtype, # Add the VSG N-terminal domain type-subtype to sequence ID.
-							description = "",
-						)
-							with open(typedsubtyped_nterms_file, "a") as typedsubtyped_nterms_outfile: # Append N-terminal domain sequence (w/ type-subtype) to a file.
-								SeqIO.write(typedsubtyped_nterm_seqRecord, typedsubtyped_nterms_outfile, "fasta")
-				print "%r contains the most probable N-terminal domain(s) with the corresponding type-subtype." % typedsubtyped_nterms_file
-				print "Sequence ID(s) updated to include correct N-terminal type-subtype.\n"
+	if file.endswith("TypeABsubtype.out"):
+		empty = "#" # If there are no hmmscan hits, then the fourth line in hmmscan .out file contains "#".
+		fourth_line = str(linecache.getline(file, 4))
+		if not empty in fourth_line:
+			typed_nterms = nterm_subtype_ID(file, all_original_seqIDs) # Dictionary - {N-terminal domain sequence ID: type-subtype}.
+			print ("Found most probable type and subtype of the identified N-terminal domain(s) in %r.\n") % file
+			typedsubtyped_nterms_file = infile_base + "_Nterm_wType_FINAL.fa" # Name of file that will contain the N-terminal domain sequence(s) with type-subtype.
+			for sequence in SeqIO.parse(seq_variants_file, "fasta"):
+				for nterm_seqID, nterm_seqTypeSubtype  in typed_nterms.items():
+					if nterm_seqID == sequence.id:
+						typedsubtyped_nterm_seqRecord = SeqRecord(
+						seq = sequence.seq,
+						id = sequence.id + "_Type" + nterm_seqTypeSubtype, # Add the VSG N-terminal domain type-subtype to sequence ID.
+						description = "",
+					)
+						with open(typedsubtyped_nterms_file, "a") as typedsubtyped_nterms_outfile: # Append N-terminal domain sequence (w/ type-subtype) to a file.
+							SeqIO.write(typedsubtyped_nterm_seqRecord, typedsubtyped_nterms_outfile, "fasta")
+			print "%r contains the most probable N-terminal domain(s) with the corresponding type-subtype." % typedsubtyped_nterms_file
+			print "Sequence ID(s) updated to include correct N-terminal type-subtype.\n"
 
 print "Preparing summary dataframe..."
 summary_csv(infile, typedsubtyped_nterms_file)
@@ -310,3 +310,4 @@ subprocess.call(['mv '+seq_variants_file+' '+seq_nterms_file_wType+' *.out *hmms
 subprocess.call(['rm '+seq_nterms_file_woType+''], shell=True)
 
 print "Finished with %r." % infile
+
