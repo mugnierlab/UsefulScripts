@@ -16,9 +16,9 @@ def iterate_trim(sequence, list_of_seq_variants):
 
 	if len(sequence.seq) > 1: # If sequence is longer than the minimum of 1 amino acid.
 		single_trim = SeqRecord(
-			seq = sequence.seq[:-1], # Single amino acid removal from the 3' end.
-			id = list_of_seq_variants[0].id.split("Ntrimmed0")[0] + "Ntrimmed" + str(len(list_of_seq_variants[0]) - len(sequence.seq[:-1])), # Append the total number of amino acids removed to the sequence ID.
-			description = "",
+		seq = sequence.seq[:-1], # Remove an amino acid from the 3' end.
+		id = list_of_seq_variants[0].id.split("Ntrimmed0")[0] + "Ntrimmed" + str(len(list_of_seq_variants[0]) - len(sequence.seq[:-1])), # Append the total number of amino acids removed to the sequence ID.
+		description = "",
 		)
 		list_of_seq_variants.append(single_trim) # Append trimmed sequence to a list.
 		iterate_trim(list_of_seq_variants[-1], list_of_seq_variants) # The last sequence appended to the list of sequence variants is trimmed.
@@ -125,7 +125,7 @@ def nterm_subtype_ID(hmmscan_out, all_original_seqIDs):
 			if filler not in line:
 				line = line.strip("\n")
 				row_values = line.split()[0:] # Remove white-space delimiters and place values in list.
-				seq_profile.append(str(os.path.splitext(row_values[0])[0][-2:])) # Appends hit profile type-subtype to list.
+				seq_profile.append(str(row_values[0])[-2:]) # Appends hit profile type-subtype to list.
 				seq_IDs.append(row_values[2]) # Append N-terminal domain sequence ID (with "_NtrimmedX") to list.
 				seq_scores.append(float(row_values[5])) # Appends corresponding sequential bit score to list.
 
@@ -137,16 +137,17 @@ def nterm_subtype_ID(hmmscan_out, all_original_seqIDs):
 
 	for original_seqID in all_original_seqIDs: # For each sequence ID in original FASTA file (without "_NtrimmedX").
 		if any(original_seqID + "_" in id for id in seq_profile_seqID_score_df["seqID"]):
-				# Make subset DataFrame that contains all N-terminal domain sequence type-subtype hits of an input sequence.
-				one_seq_df = seq_profile_seqID_score_df.loc[seq_profile_seqID_score_df["seqID"].str.contains(original_seqID + "_")]
-				one_seq_df = one_seq_df.drop_duplicates(subset = ["seqID"], keep = "first") # Remove duplicate type-subtype hits, keep first occurence (most probable).
-				most_probable_variant_seqIDs.append(one_seq_df.iloc[0]["seqID"]) # Append N-terminal domain sequence ID to list.
-				most_probable_variant_type.append(one_seq_df.iloc[0]["seq_profile"]) # Append N-terminal domain type-subtype to list.
+			# Make subset DataFrame that contains all N-terminal domain sequence type-subtype hits of an input sequence.
+			one_seq_df = seq_profile_seqID_score_df.loc[seq_profile_seqID_score_df["seqID"].str.contains(original_seqID + "_")]
+			one_seq_df = one_seq_df.drop_duplicates(subset = ["seqID"], keep = "first") # Remove duplicate type-subtype hits, keep first occurence (most probable).
+			most_probable_variant_seqIDs.append(one_seq_df.iloc[0]["seqID"]) # Append N-terminal domain sequence ID to list.
+			most_probable_variant_type.append(one_seq_df.iloc[0]["seq_profile"]) # Append N-terminal domain type-subtype to list.
 		most_probable_dict = dict(zip(most_probable_variant_seqIDs, most_probable_variant_type)) # Dictionary - {N-terminal domain sequence ID: type-subtype}.
 	return most_probable_dict
 
 def summary_csv(original_seq_file, nterms_file):
 	"""Creates a CSV file containing information about the input VSG sequence(s) and the identified N-terminal domain of said sequence(s)."""
+
 	original_seqID = []
 	original_seqlength = []
 	nterm_seqID = []
@@ -159,7 +160,10 @@ def summary_csv(original_seq_file, nterms_file):
 		for original_sequence in SeqIO.parse(original_seq_file, "fasta"):
 			if original_sequence.id + "_" in nterm_sequence.id:
 				original_seqID.append(original_sequence.id)
-				original_seqlength.append(len(original_sequence.seq))
+
+				trimmed = int(nterm_sequence.id.split("Ntrimmed")[1].split("_Type")[0])
+				original_seqlength.append(len(nterm_sequence.seq) + trimmed)
+
 				nterm_seqID.append(nterm_sequence.id)
 				nterm_seqlength.append(len(nterm_sequence.seq))
 				nterm_type.append(nterm_sequence.id[-2:-1])
@@ -202,7 +206,7 @@ else:
 		sys.exit("Path to HMM profiles does not exist.")
 	else:
 		if not path_hmm.endswith("/"):
-			path_hmm = path_hmm + "/"
+			path_hmm += "/"
 
 seq_variants_file = infile_base + "_Nterm_variants.fa" # Name of file that will contain sequence variants.
 if os.path.exists(seq_variants_file):
@@ -218,13 +222,13 @@ for sequence in SeqIO.parse(infile, "fasta"):
 		seq = sequence.seq.rstrip("*"), # Remove identifier.
 		id = sequence.id + "_Ntrimmed0", # Modify the original sequence ID to indicate untrimmed status.
 		description = "",
-	)
+		)
 	else:
 		untrimmed_sequence = SeqRecord(
 		seq = sequence.seq,
 		id = sequence.id + "_Ntrimmed0", # Modify the original sequence ID to indicate untrimmed status.
 		description = "",
-	)
+		)
 	seq_variants = []
 	seq_variants.append(untrimmed_sequence)
 	print "Trimming of %r in progress..." % sequence.id
@@ -252,7 +256,7 @@ for file in os.listdir(os.getcwd()):
 						seq = sequence.seq,
 						id = sequence.id + "_Type" + type_letter, # Add the VSG N-terminal domain Type to sequence ID.
 						description = "",
-					)
+						)
 						with open(nterms_file, "a") as nterms_outfile: # Append N-terminal domain sequence to a file.
 							SeqIO.write(nterm_seqRecord, nterms_outfile, "fasta")
 
@@ -268,9 +272,9 @@ else:
 	for sequence in SeqIO.parse(seq_nterms_file_wType, "fasta"):
 		nterm_woType = SeqRecord(
 		seq = sequence.seq,
-		id = (sequence.id).split("_Type")[0], # Modify N-terminal sequence ID to remove "_TypeX".
+		id = sequence.id.split("_Type")[0], # Modify N-terminal sequence ID to remove "_TypeX".
 		description = "",
-	)
+		)
 		with open(seq_nterms_file_woType, "a") as seq_nterms_file_woType_outfile:
 			SeqIO.write(nterm_woType, seq_nterms_file_woType_outfile, "fasta")
 
@@ -287,13 +291,13 @@ for file in os.listdir(os.getcwd()):
 			print ("Found most probable type and subtype of the identified N-terminal domain(s) in %r.\n") % file
 			typedsubtyped_nterms_file = infile_base + "_Nterm_wType_FINAL.fa" # Name of file that will contain the N-terminal domain sequence(s) with type-subtype.
 			for sequence in SeqIO.parse(seq_variants_file, "fasta"):
-				for nterm_seqID, nterm_seqTypeSubtype  in typed_nterms.items():
+				for nterm_seqID, nterm_seqTypeSubtype in typed_nterms.items():
 					if nterm_seqID == sequence.id:
 						typedsubtyped_nterm_seqRecord = SeqRecord(
 						seq = sequence.seq,
 						id = sequence.id + "_Type" + nterm_seqTypeSubtype, # Add the VSG N-terminal domain type-subtype to sequence ID.
 						description = "",
-					)
+						)
 						with open(typedsubtyped_nterms_file, "a") as typedsubtyped_nterms_outfile: # Append N-terminal domain sequence (w/ type-subtype) to a file.
 							SeqIO.write(typedsubtyped_nterm_seqRecord, typedsubtyped_nterms_outfile, "fasta")
 			print "%r contains the most probable N-terminal domain(s) with the corresponding type-subtype." % typedsubtyped_nterms_file

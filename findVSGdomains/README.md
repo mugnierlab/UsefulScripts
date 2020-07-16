@@ -31,11 +31,11 @@ For more details about arguments see [Input](#input).
 
 ### Required files for HMMER hmmscan
 * VSG N-terminal TypeA hmm profile ([Wickstead et al.](https://www.sciencedirect.com/science/article/pii/S0166685114000772)) - (`VSG-N-TypeA.hmm`)
-* VSG N-terminal TypeB hmm profile([Wickstead et al.](https://www.sciencedirect.com/science/article/pii/S0166685114000772)) - (`VSG-N-TypeB.hmm`)
+* VSG N-terminal TypeB hmm profile ([Wickstead et al.](https://www.sciencedirect.com/science/article/pii/S0166685114000772)) - (`VSG-N-TypeB.hmm`)
 * VSG N-terminal TypeSubtype hmm profile - (`VSG-N-TypeSubtype.hmm`)
 
 HMM profile files are located in [HMMprofiles](HMMprofiles).  
-The files must be in a sinlge directory (and the path to this directory provided as `path`).  
+The files must be in a single directory (and the path to this directory provided as `path`).  
 HMM profile files must first be compressed and indexed using HMMER hmmpress.
 
 For example:
